@@ -1,36 +1,75 @@
-# This is a basic workflow to help you get started with Actions
+name: OWASP ZAP Scan
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  zap_scan:
     runs-on: ubuntu-latest
+    name: Scan Website with OWASP ZAP
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Extract URL from Code
+        id: extract_url
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          # --- Elige UNA de las siguientes opciones y borra o comenta las otras ---
+
+          # Opción A: Para archivos .env (o similares)
+          # Reemplaza 'DEPLOY_URL=' y '.env' con tu clave y nombre de archivo
+          #URL_VALUE=$(grep 'DEPLOY_URL=' .env | cut -d '=' -f 2- | tr -d '"')
+
+          # Opción B: Para archivos JSON
+          # Reemplaza '.deployment.targetUrl' y 'config.json' con tu selector y nombre de archivo
+          # URL_VALUE=$(jq -r '.deployment.targetUrl' config.json)_
+          
+          # Opción C: Para archivos de texto simple
+          # Reemplaza 'url.txt' con el nombre de tu archivo
+          URL_VALUE=$(cat url.txt)
+
+          # --- No modifiques las siguientes líneas ---
+          if [ -z "$URL_VALUE" ]; then
+            echo "Error: No se pudo extraer la URL del archivo de código."
+            exit 1
+          fi
+          echo " URL extraída: $URL_VALUE"
+          echo "URL_TO_SCAN=$URL_VALUE" >> $GITHUB_ENV
+
+      # Nuevo paso para obtener la fecha y hora
+      - name: Get Timestamp
+        id: timestamp
+        run: echo "TIMESTAMP=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
+
+      - name: Create ZAP directory and Set Permissions
+        run: |
+          mkdir -p ./zap/wrk
+          sudo chmod -R 777 ./zap/wrk
+
+      # Paso modificado para usar el timestamp en el nombre del reporte
+      - name: Run ZAP Scan
+        run: |
+          REPORT_NAME="report-${{ env.TIMESTAMP }}.html"
+          echo "Iniciando escaneo ZAP en la URL extraída del codigo: ${{ env.URL_TO_SCAN }}"
+          echo "El informe se guardará como: $REPORT_NAME "
+          
+          docker run --rm \
+            -v $(pwd)/zap/wrk:/zap/wrk:rw \
+            zaproxy/zap-stable zap-full-scan.py \
+            -t ${{ env.URL_TO_SCAN }} \
+            -g gen.conf \
+            -r $REPORT_NAME || echo "ZAP scan found vulnerabilities or an error occurred. Exit code: $?"
+
+      # Paso modificado para subir el reporte con el nombre dinámico
+      - name: Upload ZAP Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZAP-Report-${{ env.TIMESTAMP }}
+          path: ./zap/wrk/report-${{ env.TIMESTAMP }}.html
+          retention-days: 7
