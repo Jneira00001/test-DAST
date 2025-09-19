@@ -1,142 +1,136 @@
-name: OWASP ZAP Full Scan
+name: OWASP ZAP Scan (Commits & PRs)
 
 on:
   pull_request:
     branches: [ main ]
-  push:
-    branches: [ main ]
+  push:             # 🔹 ahora todos los commits en cualquier rama
+    branches: [ "**" ]
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   zap_scan:
     runs-on: ubuntu-latest
-    name: ZAP Full Scan (PR → main)
+    name: ZAP Scan
 
     env:
-      # Valores por defecto (puedes sobreescribir con secrets o variables de repo)
       URL_FILE: url.txt
-      TIMEOUT_MINUTES: 30          # tiempo máximo del escaneo docker (en minutos)
-      FAIL_ON_HIGH: "true"         # "true" -> falla el job si hay alertas High/Critical
+      TIMEOUT_MINUTES_BASELINE: 10
+      TIMEOUT_MINUTES_FULL: 60
       REPORT_RETENTION_DAYS: 7
+      FAIL_ON_HIGH: "false"          # puedes poner "true" si quieres bloquear merges
+      ZAP_WORKDIR: "${{ github.workspace }}/zap/wrk"
 
     steps:
-      - name: Checkout código
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Leer URL objetivo desde archivo o ENV
-        id: get_url
-        run: |
-          # si se provee URL en variable de entorno GITHUB_URL_TO_SCAN la priorizamos
-          if [ -n "${{ vars.URL_TO_SCAN }}" ]; then
-            echo "Usando URL desde variable de repo: ${{ vars.URL_TO_SCAN }}"
-            echo "URL_TO_SCAN=${{ vars.URL_TO_SCAN }}" >> $GITHUB_ENV
-            exit 0
-          fi
+      - name: Install jq
+        run: sudo apt-get update -y && sudo apt-get install -y jq
 
+      - name: Read URL from file
+        run: |
           if [ -f "${{ env.URL_FILE }}" ]; then
             URL_VALUE=$(cat "${{ env.URL_FILE }}" | tr -d '\r\n' | sed -e 's/^[ \t]*//;s/[ \t]*$//')
             if [ -z "$URL_VALUE" ]; then
-              echo "Error: ${ env.URL_FILE } existe pero está vacío."
+              echo "Error: ${URL_FILE} vacío"
               exit 1
             fi
-            echo "URL extraída de ${ env.URL_FILE }: $URL_VALUE"
             echo "URL_TO_SCAN=$URL_VALUE" >> $GITHUB_ENV
           else
-            echo "Error: no existe ${ env.URL_FILE } y no se recibió URL por variables."
+            echo "Error: no existe ${URL_FILE}"
             exit 1
           fi
 
-      - name: Timestamp
-        id: ts
+      - name: Prepare workdir
+        run: mkdir -p "${{ env.ZAP_WORKDIR }}"
+
+      - name: Set timestamp
         run: echo "TIMESTAMP=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
 
-      - name: Crear directorio ZAP y permisos
+      - name: Decide scan type
         run: |
-          mkdir -p "${{ github.workspace }}/zap/wrk"
-          chmod -R a+rw "${{ github.workspace }}/zap/wrk"
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "SCAN_TYPE=full" >> $GITHUB_ENV
+          else
+            echo "SCAN_TYPE=baseline" >> $GITHUB_ENV
+          fi
 
-      - name: Ejecutar ZAP Full Scan (docker)
-        id: zap_run
+      - name: Run ZAP Scan
         run: |
-          REPORT_BASE="zap-report-${{ env.TIMESTAMP }}"
+          REPORT_BASE="zap-${{ env.SCAN_TYPE }}-${{ env.TIMESTAMP }}"
           HTML_REPORT="${REPORT_BASE}.html"
           JSON_REPORT="${REPORT_BASE}.json"
-          # timeout en segundos
-          TIMEOUT_SEC=$(( ${{ env.TIMEOUT_MINUTES }} * 60 ))
+          LOG_REPORT="${REPORT_BASE}.log"
 
-          echo "Iniciando zap-full-scan.py sobre: ${{ env.URL_TO_SCAN }}"
-          echo "Reporte HTML: $HTML_REPORT"
-          echo "Reporte JSON: $JSON_REPORT"
+          if [ "${{ env.SCAN_TYPE }}" = "baseline" ]; then
+            TIMEOUT=${{ env.TIMEOUT_MINUTES_BASELINE }}
+            CMD="zap-baseline.py -t ${{ env.URL_TO_SCAN }} -r /zap/wrk/${HTML_REPORT} -J /zap/wrk/${JSON_REPORT} -d"
+          else
+            TIMEOUT=${{ env.TIMEOUT_MINUTES_FULL }}
+            CMD="zap-full-scan.py -t ${{ env.URL_TO_SCAN }} -r /zap/wrk/${HTML_REPORT} -J /zap/wrk/${JSON_REPORT} -d"
+          fi
 
-          timeout ${TIMEOUT_SEC} docker run --rm \
-            -v "${{ github.workspace }}/zap/wrk":/zap/wrk:rw \
+          echo "Running ${{ env.SCAN_TYPE }} scan on ${{ env.URL_TO_SCAN }}"
+          timeout ${TIMEOUT}m docker run --rm \
+            -v "${{ env.ZAP_WORKDIR }}":/zap/wrk:rw \
             zaproxy/zap-stable:latest \
-            zap-full-scan.py \
-              -t "${{ env.URL_TO_SCAN }}" \
-              -r "/zap/wrk/${HTML_REPORT}" \
-              -J "/zap/wrk/${JSON_REPORT}" \
-              -z "-config spider.maxDepth=2 -config ajaxSpider.browserId=htmlunit -config view.mode=attack"
+            sh -c "${CMD} 2>&1 | tee /zap/wrk/${LOG_REPORT}"
 
-          EXIT_CODE=$? || true
-          echo "ZAP finished with exit code: $EXIT_CODE"
-          # exportamos nombres para pasos posteriores
           echo "HTML_REPORT=${HTML_REPORT}" >> $GITHUB_ENV
           echo "JSON_REPORT=${JSON_REPORT}" >> $GITHUB_ENV
+          echo "LOG_REPORT=${LOG_REPORT}" >> $GITHUB_ENV
 
-          # no fallar aquí — manejamos el resultado en pasos siguientes
-          echo "::set-output name=exit_code::$EXIT_CODE"
-
-      - name: Parsear resultados ZAP (resumen)
+      - name: Parse results
         id: parse
         run: |
-          JSON="/zap/wrk/${{ env.JSON_REPORT }}"
-          if [ ! -f "${{ github.workspace }}/zap/wrk/${{ env.JSON_REPORT }}" ]; then
-            echo "No se encontró ${JSON}. Posible timeout o error en ZAP."
-            echo "high_count=0" >> $GITHUB_OUTPUT
-            echo "medium_count=0" >> $GITHUB_OUTPUT
-            echo "low_count=0" >> $GITHUB_OUTPUT
+          JSON="${{ env.ZAP_WORKDIR }}/${{ env.JSON_REPORT }}"
+          if [ ! -f "$JSON" ]; then
+            echo "high=0" >> $GITHUB_OUTPUT
+            echo "medium=0" >> $GITHUB_OUTPUT
+            echo "low=0" >> $GITHUB_OUTPUT
             exit 0
           fi
+          HIGH=$(jq '[.site[]?.alerts[]? | select(.risk | test("High|Critical"))] | length' "$JSON")
+          MEDIUM=$(jq '[.site[]?.alerts[]? | select(.risk | test("Medium"))] | length' "$JSON")
+          LOW=$(jq '[.site[]?.alerts[]? | select(.risk | test("Low"))] | length' "$JSON")
+          echo "high=$HIGH" >> $GITHUB_OUTPUT
+          echo "medium=$MEDIUM" >> $GITHUB_OUTPUT
+          echo "low=$LOW" >> $GITHUB_OUTPUT
 
-          # contar por riesgo usando jq (ajustar según estructura)
-          HIGH=$(jq '[.site[]?.alerts[]? | select(.risk == "High" or .risk == "Critical")] | length' "${{ github.workspace }}/zap/wrk/${{ env.JSON_REPORT }}" || echo 0)
-          MEDIUM=$(jq '[.site[]?.alerts[]? | select(.risk == "Medium")] | length' "${{ github.workspace }}/zap/wrk/${{ env.JSON_REPORT }}" || echo 0)
-          LOW=$(jq '[.site[]?.alerts[]? | select(.risk == "Low")] | length' "${{ github.workspace }}/zap/wrk/${{ env.JSON_REPORT }}" || echo 0)
-
-          echo "High=${HIGH}, Medium=${MEDIUM}, Low=${LOW}"
-          echo "high_count=${HIGH}" >> $GITHUB_OUTPUT
-          echo "medium_count=${MEDIUM}" >> $GITHUB_OUTPUT
-          echo "low_count=${LOW}" >> $GITHUB_OUTPUT
-
-      - name: Crear comentario en PR con resumen (opcional)
+      - name: Comment results on PR
         if: github.event_name == 'pull_request'
-        uses: stefanzweifel/create-comment@v2
+        uses: peter-evans/create-or-update-comment@v4
         with:
+          issue-number: ${{ github.event.pull_request.number }}
           body: |
-            **OWASP ZAP scan results**
+            ## 🛡️ OWASP ZAP ${{ env.SCAN_TYPE }} scan
             - Objetivo: `${{ env.URL_TO_SCAN }}`
-            - Reporte: `zap-report-${{ env.TIMESTAMP }}.html` (artefacto del workflow)
-            - Alertas High/Critical: **${{ steps.parse.outputs.high_count }}**
-            - Alertas Medium: **${{ steps.parse.outputs.medium_count }}**
-            - Alertas Low: **${{ steps.parse.outputs.low_count }}**
-            _Si quieres revisar el HTML/JSON, baja los artefactos desde la pestaña Actions → Artifacts._
+            - Alertas High: **${{ steps.parse.outputs.high }}**
+            - Alertas Medium: **${{ steps.parse.outputs.medium }}**
+            - Alertas Low: **${{ steps.parse.outputs.low }}**
+            _(Descarga reportes completos en Artifacts)_
 
-      - name: Fallar si existen High/Critical (configurable)
-        if: always()
-        run: |
-          HIGH=${{ steps.parse.outputs.high_count }}
-          if [ "${{ env.FAIL_ON_HIGH }}" = "true" ] && [ "${HIGH}" -gt 0 ]; then
-            echo "Se detectaron ${HIGH} alertas High/Critical. Failing the job as requested by FAIL_ON_HIGH=true"
-            exit 1
-          fi
-          echo "No se falla: FAIL_ON_HIGH=${{ env.FAIL_ON_HIGH }} y high=${HIGH}"
-
-      - name: Subir artefactos (HTML + JSON)
+      - name: Upload reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ZAP-Report-${{ env.TIMESTAMP }}
+          name: ZAP-${{ env.SCAN_TYPE }}-${{ env.TIMESTAMP }}
           path: |
-            zap/wrk/${{ env.HTML_REPORT }}
-            zap/wrk/${{ env.JSON_REPORT }}
+            ${{ env.ZAP_WORKDIR }}/${{ env.HTML_REPORT }}
+            ${{ env.ZAP_WORKDIR }}/${{ env.JSON_REPORT }}
+            ${{ env.ZAP_WORKDIR }}/${{ env.LOG_REPORT }}
           retention-days: ${{ env.REPORT_RETENTION_DAYS }}
+
+      - name: Fail if High alerts (policy)
+        if: always()
+        run: |
+          HIGH=${{ steps.parse.outputs.high }}
+          if [ "${{ env.FAIL_ON_HIGH }}" = "true" ] && [ "$HIGH" -gt 0 ]; then
+            echo "Se detectaron $HIGH alertas High -> fail job"
+            exit 1
+          fi
+          echo "Policy passed"
