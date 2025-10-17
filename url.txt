@@ -1,1 +1,1 @@
-http://localhost/
+http://testphp.vulnweb.com/
