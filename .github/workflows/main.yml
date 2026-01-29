@@ -60,7 +60,7 @@ jobs:
           
           docker run --rm \
             -v $(pwd)/zap/wrk:/zap/wrk:rw \
-            zaproxy/zap-stable zap-full-scan.py \
+            zaproxy/zap-stable zap-baseline.py \
             -t ${{ env.URL_TO_SCAN }} \
             -g gen.conf \
             -r $REPORT_NAME || echo "ZAP scan found vulnerabilities or an error occurred. Exit code: $?"
