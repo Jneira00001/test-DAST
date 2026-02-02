@@ -29,10 +29,9 @@ Este repositorio contiene un **pipeline de CI/CD** que realiza automáticamente 
 - SQL Injection
 - Cross-Site Scripting (XSS)
 - Security Misconfigurations
-- Broken Authentication
 - Sensitive Data Exposure
 - XML External Entities (XXE)
-- Broken Access Control
+- LFI
 - Y más...
 
 ---
