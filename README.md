@@ -18,8 +18,6 @@ Pipeline automatizado de **Dynamic Application Security Testing (DAST)** para ap
 - [Configuración del Workflow](#️-configuración-del-workflow)
 - [Tecnologías Utilizadas](#️-tecnologías-utilizadas)
 - [Consideraciones de Seguridad](#-consideraciones-de-seguridad)
-- [Licencia](#-licencia)
-- [Agradecimientos](#-agradecimientos)
 - [Recursos Adicionales](#-recursos-adicionales)
 
 ---
@@ -30,11 +28,11 @@ Este repositorio contiene un **pipeline de CI/CD** que realiza automáticamente 
 
 - SQL Injection
 - Cross-Site Scripting (XSS)
-- Configuraciones de Seguridad Incorrectas
-- Autenticación Rota
-- Exposición de Datos Sensibles
+- Security Misconfigurations
+- Broken Authentication
+- Sensitive Data Exposure
 - XML External Entities (XXE)
-- Control de Acceso Roto
+- Broken Access Control
 - Y más...
 
 ---
@@ -194,20 +192,6 @@ Puedes modificar el workflow para:
 2. Notificar a tu equipo antes de ejecutar escaneos
 3. Revisar y clasificar los hallazgos apropiadamente
 4. Integrar los hallazgos en tu proceso de gestión de vulnerabilidades
-
----
-
-## 📄 Licencia
-
-Este proyecto está licenciado bajo la **Licencia MIT** - consulta el archivo [LICENSE](LICENSE) para más detalles.
-
----
-
-## 🙏 Agradecimientos
-
-- [OWASP ZAP Team](https://www.zaproxy.org/) por la increíble herramienta de seguridad
-- [GitHub Actions](https://github.com/features/actions) por la plataforma CI/CD
-- Proyecto OWASP Top 10
 
 ---
 
