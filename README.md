@@ -1,250 +1,227 @@
-# 🔒 Web DAST - Automated Security Testing with OWASP ZAP
+# 🔒 Web DAST - Pruebas de Seguridad Automatizadas con OWASP ZAP
 
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Jneira00001/test-DAST/main.yml?branch=main&label=DAST%20Scan)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/jhneira-sol/zap-security-scanner/main.yml?branch=main&label=DAST%20Scan)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![OWASP](https://img.shields.io/badge/OWASP-ZAP-blue)
 ![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF)
 
-Automated **Dynamic Application Security Testing (DAST)** pipeline for web applications using **OWASP ZAP** integrated with GitHub Actions. This project demonstrates DevSecOps best practices by implementing continuous security testing in CI/CD workflows.
+Pipeline automatizado de **Dynamic Application Security Testing (DAST)** para aplicaciones web usando **OWASP ZAP** integrado con GitHub Actions. Este proyecto demuestra las mejores prácticas de DevSecOps mediante la implementación de pruebas de seguridad continuas en workflows de CI/CD.
 
-## 📋 Table of Contents
+## 📋 Tabla de Contenidos
 
-- [Overview](#-overview)
-- [Features](#-features)
-- [How It Works](#-how-it-works)
-- [Prerequisites](#-prerequisites)
-- [Usage](#-usage)
-- [Scan Results](#-scan-results)
-- [Workflow Configuration](#-workflow-configuration)
-- [Technologies Used](#-technologies-used)
-- [Security Considerations](#-security-considerations)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Author](#-author)
+- [Descripción General](#-descripción-general)
+- [Características](#-características)
+- [Cómo Funciona](#-cómo-funciona)
+- [Requisitos Previos](#-requisitos-previos)
+- [Uso](#-uso)
+- [Resultados del Escaneo](#-resultados-del-escaneo)
+- [Configuración del Workflow](#️-configuración-del-workflow)
+- [Tecnologías Utilizadas](#️-tecnologías-utilizadas)
+- [Consideraciones de Seguridad](#-consideraciones-de-seguridad)
+- [Licencia](#-licencia)
+- [Agradecimientos](#-agradecimientos)
+- [Recursos Adicionales](#-recursos-adicionales)
 
 ---
 
-## 🎯 Overview
+## 🎯 Descripción General
 
-This repository contains a **CI/CD pipeline** that automatically performs security scans on web applications using **OWASP ZAP (Zed Attack Proxy)**. The scanner identifies common web vulnerabilities based on the **OWASP Top 10** including:
+Este repositorio contiene un **pipeline de CI/CD** que realiza automáticamente escaneos de seguridad en aplicaciones web utilizando **OWASP ZAP (Zed Attack Proxy)**. El scanner identifica vulnerabilidades web comunes basadas en el **OWASP Top 10** incluyendo:
 
 - SQL Injection
 - Cross-Site Scripting (XSS)
-- Security Misconfigurations
-- Broken Authentication
-- Sensitive Data Exposure
+- Configuraciones de Seguridad Incorrectas
+- Autenticación Rota
+- Exposición de Datos Sensibles
 - XML External Entities (XXE)
-- Broken Access Control
-- And more...
+- Control de Acceso Roto
+- Y más...
 
 ---
 
-## ✨ Features
+## ✨ Características
 
-- ⚡ **Automated scanning** triggered on every push or PR
-- 🔍 **OWASP ZAP integration** for comprehensive vulnerability detection
-- 📊 **HTML reports** generated automatically
-- 🔄 **GitHub Actions workflow** for seamless CI/CD integration
-- 📦 **Artifact storage** for scan results
-- 🎯 **Baseline scan mode** for quick vulnerability assessment
-- 🛡️ **OWASP Top 10 coverage**
+- ⚡ **Escaneo automatizado** activado en cada push o PR
+- 🔍 **Integración con OWASP ZAP** para detección completa de vulnerabilidades
+- 📊 **Reportes HTML** generados automáticamente
+- 🔄 **Workflow de GitHub Actions** para integración CI/CD sin fricciones
+- 📦 **Almacenamiento de artifacts** para resultados de escaneos
+- 🎯 **Modo baseline scan** para evaluación rápida de vulnerabilidades
+- 🛡️ **Cobertura del OWASP Top 10**
 
 ---
 
-## 🔄 How It Works
+## 🔄 Cómo Funciona
 
 ```mermaid
 graph LR
-    A[Push to Main] --> B[GitHub Actions Triggered]
-    B --> C[Read Target URL]
-    C --> D[OWASP ZAP Container Starts]
-    D --> E[Baseline Scan Executed]
-    E --> F[Generate HTML Report]
-    F --> G[Upload Artifacts]
-    G --> H[Scan Complete]
+    A[Push a Main] --> B[GitHub Actions Activado]
+    B --> C[Leer URL Objetivo]
+    C --> D[Contenedor OWASP ZAP Inicia]
+    D --> E[Baseline Scan Ejecutado]
+    E --> F[Generar Reporte HTML]
+    F --> G[Subir Artifacts]
+    G --> H[Escaneo Completo]
 ```
 
-1. **Trigger**: Push to `main` branch or manual workflow dispatch
-2. **Setup**: GitHub Actions runner spins up Ubuntu environment
-3. **Target**: Reads target URL from `url.txt`
-4. **Scan**: OWASP ZAP performs baseline security scan
-5. **Report**: Generates HTML report with findings
-6. **Store**: Artifacts uploaded for review
+1. **Trigger**: Push a la rama `main` o ejecución manual del workflow
+2. **Setup**: GitHub Actions runner inicia entorno Ubuntu
+3. **Objetivo**: Lee la URL objetivo desde `url.txt`
+4. **Escaneo**: OWASP ZAP ejecuta baseline security scan
+5. **Reporte**: Genera reporte HTML con los hallazgos
+6. **Almacenamiento**: Artifacts subidos para revisión
 
 ---
 
-## 📦 Prerequisites
+## 📦 Requisitos Previos
 
-- GitHub repository with Actions enabled
-- Target web application URL
-- Basic understanding of web security concepts
+- Repositorio de GitHub con Actions habilitado
+- URL de aplicación web objetivo
+- Conocimiento básico de conceptos de seguridad web
 
 ---
 
-## 🚀 Usage
+## 🚀 Uso
 
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/Jneira00001/test-DAST.git
-cd test-DAST
-```
-
-### 2. Configure Target URL
-
-Edit the `url.txt` file with your target web application URL:
+### 1. Clonar el Repositorio
 
 ```bash
-echo "https://example.com" > url.txt
+git clone https://github.com/jhneira-sol/zap-security-scanner.git
+cd zap-security-scanner
 ```
 
-### 3. Push Changes
+### 2. Configurar URL Objetivo
+
+Edita el archivo `url.txt` con la URL de tu aplicación web objetivo:
+
+```bash
+echo "https://ejemplo.com" > url.txt
+```
+
+### 3. Subir Cambios
 
 ```bash
 git add url.txt
-git commit -m "Update target URL"
+git commit -m "Actualizar URL objetivo"
 git push origin main
 ```
 
-### 4. Monitor Workflow
+### 4. Monitorear el Workflow
 
-Navigate to **Actions** tab in GitHub to monitor the scan progress.
+Navega a la pestaña **Actions** en GitHub para monitorear el progreso del escaneo.
 
-### 5. Download Report
+### 5. Descargar Reporte
 
-Once completed:
-1. Go to the workflow run
-2. Scroll to **Artifacts** section
-3. Download the HTML report
+Una vez completado:
+1. Ve a la ejecución del workflow
+2. Desplázate a la sección **Artifacts**
+3. Descarga el reporte HTML
 
 ---
 
-## 📊 Scan Results
+## 📊 Resultados del Escaneo
 
-The OWASP ZAP scanner generates an **HTML report** containing:
+El scanner OWASP ZAP genera un **reporte HTML** que contiene:
 
-- **Summary** of vulnerabilities found
-- **Risk levels**: High, Medium, Low, Informational
-- **Detailed findings** with:
-  - Vulnerability description
-  - Affected URLs
-  - Evidence
-  - Remediation recommendations
-  - CWE/WASC references
+- **Resumen** de vulnerabilidades encontradas
+- **Niveles de riesgo**: Alto, Medio, Bajo, Informativo
+- **Hallazgos detallados** con:
+  - Descripción de la vulnerabilidad
+  - URLs afectadas
+  - Evidencia
+  - Recomendaciones de remediación
+  - Referencias CWE/WASC
 
-### Example Report Structure:
+### Ejemplo de Estructura del Reporte:
 
 ```
 📄 ZAP Scanning Report
-├── 🔴 High Risk Alerts (0)
-├── 🟠 Medium Risk Alerts (2)
-├── 🟡 Low Risk Alerts (5)
-└── 🔵 Informational Alerts (8)
+├── 🔴 Alertas de Riesgo Alto (0)
+├── 🟠 Alertas de Riesgo Medio (2)
+├── 🟡 Alertas de Riesgo Bajo (5)
+└── 🔵 Alertas Informativas (8)
 ```
 
 ---
 
-## ⚙️ Workflow Configuration
+## ⚙️ Configuración del Workflow
 
-The GitHub Actions workflow is defined in `.github/workflows/main.yml`.
+El workflow de GitHub Actions está definido en `.github/workflows/main.yml`.
 
-### Key Components:
+### Componentes Principales:
 
-- **Trigger**: `push` to main branch, `workflow_dispatch` for manual runs
+- **Trigger**: `push` a la rama main, `workflow_dispatch` para ejecuciones manuales
 - **Runner**: `ubuntu-latest`
-- **OWASP ZAP Action**: Official ZAP baseline scan
-- **Scan Type**: Baseline (passive + active)
-- **Report Format**: HTML
-- **Artifact Retention**: 30 days
+- **OWASP ZAP Action**: Baseline scan oficial de ZAP
+- **Tipo de Escaneo**: Baseline (pasivo + activo)
+- **Formato de Reporte**: HTML
+- **Retención de Artifacts**: 30 días
 
-### Customization Options:
+### Opciones de Personalización:
 
-You can modify the workflow to:
-- Change scan depth (baseline → full scan)
-- Add authentication
-- Configure scan policies
-- Integrate with Slack/Email notifications
-- Set up security gates (fail on high-risk findings)
-
----
-
-## 🛠️ Technologies Used
-
-| Technology | Purpose |
-|------------|----------|
-| **OWASP ZAP** | Dynamic security scanner |
-| **GitHub Actions** | CI/CD automation |
-| **Docker** | Containerized scanning |
-| **Ubuntu** | Runner environment |
-| **HTML** | Report generation |
+Puedes modificar el workflow para:
+- Cambiar profundidad del escaneo (baseline → full scan)
+- Agregar autenticación
+- Configurar políticas de escaneo
+- Integrar con notificaciones Slack/Email
+- Establecer security gates (fallar en hallazgos de alto riesgo)
 
 ---
 
-## 🔐 Security Considerations
+## 🛠️ Tecnologías Utilizadas
 
-- ⚠️ **Never scan** production systems without authorization
-- ⚠️ **Never commit** sensitive credentials or API keys
-- ⚠️ **Always review** scan results before sharing
-- ⚠️ **Use responsibly** - only scan applications you own or have permission to test
-- ⚠️ **Rate limiting** - Some targets may block aggressive scans
-
-### Best Practices:
-
-1. Test against **staging/development environments** first
-2. Notify your team before running scans
-3. Review and triage findings appropriately
-4. Integrate findings into your vulnerability management process
+| Tecnología | Propósito |
+|------------|-----------|
+| **OWASP ZAP** | Scanner de seguridad dinámico |
+| **GitHub Actions** | Automatización CI/CD |
+| **Docker** | Escaneo containerizado |
+| **Ubuntu** | Entorno del runner |
+| **HTML** | Generación de reportes |
 
 ---
 
-## 🤝 Contributing
+## 🔐 Consideraciones de Seguridad
 
-Contributions are welcome! This is a portfolio/demonstration project.
+- ⚠️ **Nunca escanear** sistemas en producción sin autorización
+- ⚠️ **Nunca hacer commit** de credenciales sensibles o API keys
+- ⚠️ **Siempre revisar** los resultados del escaneo antes de compartir
+- ⚠️ **Usar responsablemente** - solo escanea aplicaciones que posees o tienes permiso para probar
+- ⚠️ **Rate limiting** - Algunos objetivos pueden bloquear escaneos agresivos
 
-If you'd like to suggest improvements:
+### Mejores Prácticas:
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/improvement`)
-3. Commit your changes (`git commit -m 'Add improvement'`)
-4. Push to the branch (`git push origin feature/improvement`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+1. Probar contra **entornos de staging/desarrollo** primero
+2. Notificar a tu equipo antes de ejecutar escaneos
+3. Revisar y clasificar los hallazgos apropiadamente
+4. Integrar los hallazgos en tu proceso de gestión de vulnerabilidades
 
 ---
 
-## 👤 Author
+## 📄 Licencia
 
-**Jneira00001**
-
-- GitHub: [@Jneira00001](https://github.com/Jneira00001)
-- Email: jneira.tech2025@gmail.com
+Este proyecto está licenciado bajo la **Licencia MIT** - consulta el archivo [LICENSE](LICENSE) para más detalles.
 
 ---
 
-## 🙏 Acknowledgments
+## 🙏 Agradecimientos
 
-- [OWASP ZAP Team](https://www.zaproxy.org/) for the amazing security tool
-- [GitHub Actions](https://github.com/features/actions) for CI/CD platform
-- OWASP Top 10 Project
+- [OWASP ZAP Team](https://www.zaproxy.org/) por la increíble herramienta de seguridad
+- [GitHub Actions](https://github.com/features/actions) por la plataforma CI/CD
+- Proyecto OWASP Top 10
 
 ---
 
-## 📚 Additional Resources
+## 📚 Recursos Adicionales
 
-- [OWASP ZAP Documentation](https://www.zaproxy.org/docs/)
+- [Documentación OWASP ZAP](https://www.zaproxy.org/docs/)
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [DevSecOps Best Practices](https://www.devsecops.org/)
+- [Documentación GitHub Actions](https://docs.github.com/es/actions)
+- [Mejores Prácticas DevSecOps](https://www.devsecops.org/)
 
 ---
 
 <div align="center">
 
-**⭐ If you find this project useful, please consider giving it a star!**
+**⭐ Si encuentras útil este proyecto, considera darle una estrella!**
 
 </div>
