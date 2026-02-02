@@ -123,13 +123,13 @@ Una vez completado:
 El scanner OWASP ZAP genera un **reporte HTML** que contiene:
 
 - **Resumen** de vulnerabilidades encontradas
-- **Niveles de riesgo**: Alto, Medio, Bajo, Informativo
+- **Niveles de riesgo**: Crítico, Alto, Medio, Bajo, Informativo
 - **Hallazgos detallados** con:
   - Descripción de la vulnerabilidad
   - URLs afectadas
   - Evidencia
   - Recomendaciones de remediación
-  - Referencias CWE/WASC
+  - Referencias CWE
 
 ---
 
@@ -142,7 +142,7 @@ El workflow de GitHub Actions está definido en `.github/workflows/main.yml`.
 - **Trigger**: `push` a la rama main, `workflow_dispatch` para ejecuciones manuales
 - **Runner**: `ubuntu-latest`
 - **OWASP ZAP Action**: Baseline scan oficial de ZAP
-- **Tipo de Escaneo**: Baseline (pasivo + activo)
+- **Tipo de Escaneo**: Baseline 
 - **Formato de Reporte**: HTML
 - **Retención de Artifacts**: 7 días
 
