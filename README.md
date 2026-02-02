@@ -1,4 +1,4 @@
-# 🔒 Web DAST - Pruebas de Seguridad Automatizadas con OWASP ZAP
+# Web DAST - Pruebas de Seguridad Automatizadas con OWASP ZAP
 
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/jhneira-sol/zap-web-dast/main.yml?branch=main&label=DAST%20Scan)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
@@ -7,22 +7,22 @@
 
 Pipeline automatizado de **Dynamic Application Security Testing (DAST)** para aplicaciones web usando **OWASP ZAP** integrado con GitHub Actions. Este proyecto demuestra las mejores prácticas de DevSecOps mediante la implementación de pruebas de seguridad continuas en workflows de CI/CD.
 
-## 📋 Tabla de Contenidos
+## Tabla de Contenidos
 
-- [Descripción General](#-descripción-general)
-- [Características](#-características)
-- [Cómo Funciona](#-cómo-funciona)
-- [Requisitos Previos](#-requisitos-previos)
-- [Uso](#-uso)
-- [Resultados del Escaneo](#-resultados-del-escaneo)
-- [Configuración del Workflow](#️-configuración-del-workflow)
-- [Tecnologías Utilizadas](#️-tecnologías-utilizadas)
-- [Consideraciones de Seguridad](#-consideraciones-de-seguridad)
-- [Recursos Adicionales](#-recursos-adicionales)
+- [Descripción General](#descripción-general)
+- [Características](#características)
+- [Cómo Funciona](#cómo-funciona)
+- [Requisitos Previos](#requisitos-previos)
+- [Uso](#uso)
+- [Resultados del Escaneo](#resultados-del-escaneo)
+- [Configuración del Workflow](#configuración-del-workflow)
+- [Tecnologías Utilizadas](#tecnologías-utilizadas)
+- [Consideraciones de Seguridad](#consideraciones-de-seguridad)
+- [Recursos Adicionales](#recursos-adicionales)
 
 ---
 
-## 🎯 Descripción General
+## Descripción General
 
 Este repositorio contiene un **pipeline de CI/CD** que realiza automáticamente escaneos de seguridad en aplicaciones web utilizando **OWASP ZAP (Zed Attack Proxy)**. El scanner identifica vulnerabilidades web comunes basadas en el **OWASP Top 10** incluyendo:
 
@@ -36,19 +36,19 @@ Este repositorio contiene un **pipeline de CI/CD** que realiza automáticamente 
 
 ---
 
-## ✨ Características
+## Características
 
-- ⚡ **Escaneo automatizado** activado en cada push o PR
-- 🔍 **Integración con OWASP ZAP** para detección completa de vulnerabilidades
-- 📊 **Reportes HTML** generados automáticamente
-- 🔄 **Workflow de GitHub Actions** para integración CI/CD sin fricciones
-- 📦 **Almacenamiento de artifacts** para resultados de escaneos
-- 🎯 **Modo baseline scan** para evaluación rápida de vulnerabilidades
-- 🛡️ **Cobertura del OWASP Top 10**
+- Escaneo automatizado activado en cada push o PR
+- Integración con OWASP ZAP para detección completa de vulnerabilidades
+- Reportes HTML generados automáticamente
+- Workflow de GitHub Actions para integración CI/CD sin fricciones
+- Almacenamiento de artifacts para resultados de escaneos
+- Modo baseline scan para evaluación rápida de vulnerabilidades
+- Cobertura del OWASP Top 10
 
 ---
 
-## 🔄 Cómo Funciona
+## Cómo Funciona
 
 ```mermaid
 graph LR
@@ -61,6 +61,8 @@ graph LR
     G --> H[Escaneo Completo]
 ```
 
+### Flujo del Pipeline:
+
 1. **Trigger**: Push a la rama `main` o ejecución manual del workflow
 2. **Setup**: GitHub Actions runner inicia entorno Ubuntu
 3. **Objetivo**: Lee la URL objetivo desde `url.txt`
@@ -70,7 +72,7 @@ graph LR
 
 ---
 
-## 📦 Requisitos Previos
+## Requisitos Previos
 
 - Repositorio de GitHub con Actions habilitado
 - URL de aplicación web objetivo
@@ -78,7 +80,7 @@ graph LR
 
 ---
 
-## 🚀 Uso
+## Uso
 
 ### 1. Clonar el Repositorio
 
@@ -116,7 +118,7 @@ Una vez completado:
 
 ---
 
-## 📊 Resultados del Escaneo
+## Resultados del Escaneo
 
 El scanner OWASP ZAP genera un **reporte HTML** que contiene:
 
@@ -129,19 +131,9 @@ El scanner OWASP ZAP genera un **reporte HTML** que contiene:
   - Recomendaciones de remediación
   - Referencias CWE/WASC
 
-### Ejemplo de Estructura del Reporte:
-
-```
-📄 ZAP Scanning Report
-├── 🔴 Alertas de Riesgo Alto (0)
-├── 🟠 Alertas de Riesgo Medio (2)
-├── 🟡 Alertas de Riesgo Bajo (5)
-└── 🔵 Alertas Informativas (8)
-```
-
 ---
 
-## ⚙️ Configuración del Workflow
+## Configuración del Workflow
 
 El workflow de GitHub Actions está definido en `.github/workflows/main.yml`.
 
@@ -165,10 +157,10 @@ Puedes modificar el workflow para:
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
 | Tecnología | Propósito |
-|------------|-----------|
+|-----------|----------|
 | **OWASP ZAP** | Scanner de seguridad dinámico |
 | **GitHub Actions** | Automatización CI/CD |
 | **Docker** | Escaneo containerizado |
@@ -177,13 +169,13 @@ Puedes modificar el workflow para:
 
 ---
 
-## 🔐 Consideraciones de Seguridad
+## Consideraciones de Seguridad
 
-- ⚠️ **Nunca escanear** sistemas en producción sin autorización
-- ⚠️ **Nunca hacer commit** de credenciales sensibles o API keys
-- ⚠️ **Siempre revisar** los resultados del escaneo antes de compartir
-- ⚠️ **Usar responsablemente** - solo escanea aplicaciones que posees o tienes permiso para probar
-- ⚠️ **Rate limiting** - Algunos objetivos pueden bloquear escaneos agresivos
+- **Nunca escanear** sistemas en producción sin autorización
+- **Nunca hacer commit** de credenciales sensibles o API keys
+- **Siempre revisar** los resultados del escaneo antes de compartir
+- **Usar responsablemente** - solo escanea aplicaciones que posees o tienes permiso para probar
+- **Rate limiting** - Algunos objetivos pueden bloquear escaneos agresivos
 
 ### Mejores Prácticas:
 
@@ -194,17 +186,9 @@ Puedes modificar el workflow para:
 
 ---
 
-## 📚 Recursos Adicionales
+## Recursos Adicionales
 
 - [Documentación OWASP ZAP](https://www.zaproxy.org/docs/)
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [Documentación GitHub Actions](https://docs.github.com/es/actions)
 - [Mejores Prácticas DevSecOps](https://www.devsecops.org/)
-
----
-
-<div align="center">
-
-**⭐ Si encuentras útil este proyecto, considera darle una estrella!**
-
-</div>
