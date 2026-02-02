@@ -144,7 +144,7 @@ El workflow de GitHub Actions está definido en `.github/workflows/main.yml`.
 - **OWASP ZAP Action**: Baseline scan oficial de ZAP
 - **Tipo de Escaneo**: Baseline (pasivo + activo)
 - **Formato de Reporte**: HTML
-- **Retención de Artifacts**: 30 días
+- **Retención de Artifacts**: 7 días
 
 ### Opciones de Personalización:
 
