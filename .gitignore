@@ -45,26 +45,6 @@ credentials/
 *.tar.gz
 *.rar
 
-# Build artifacts
-build/
-dist/
-out/
-
-# Node modules (if using JS tools)
-node_modules/
-package-lock.json
-
-# Python (if using Python tools)
-__pycache__/
-*.py[cod]
-*$py.class
-.Python
-venv/
-ENV/
-
-# Docker
-.dockerignore
-
 # Backup files
 *.bak
 *.backup
